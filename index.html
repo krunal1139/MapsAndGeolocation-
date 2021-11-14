@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!--"I Krunal patel, 000826784 certify that this material is my original work. 
+    No other person's work has been used without due acknowledgement. I have not made my work available to anyone else.-->
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Top 10 parks in hamilton</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <div class="top-head">
+    <h1 style="text-align: center;">Information of Bike Racks in Hamilton</h1>
+    </div>
+<div class="top">
+  <div class="top-left">
+    <div class="filters">
+      <button id="private">Show Private bike racks</button>
+      <button id="School">Show School bike racks</button>
+      <button id="Municipal">Show Municipal bike racks</button>
+      <button id="ROW">Show ROW bike racks</button>
+      <button id="Park">Show Parks bike racks</button>
+      <button id="Fnull">Show bike racks with null ownerahip</button>
+      <button id="hideallMarks">hide All Marks</button>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <div class="top-right">
+    <h1>Get Directions</h1>
+    <hr>
+    <strong>Choose start location</strong><br>
+<select id="start" onchange="calcRoute();">
+  <option value="135 Fennell Avenue West, Hamilton, Ontario">Mohawk college</option>
+  <option value="64 Melrose Ave N, Hamilton, Ontario">64 Melrose Ave N, Hamilton, Ontario</option>
+  <option value="675 Upper James St, Hamilton ON L9C 2Z5">Walmart-Upper-james</option>
+  <option value="100 W 5th St, Hamilton ON L9C 0E3">Saint Joseph's Hospital</option>
+</select>
+<br>
+<strong>Choose Destination</strong><br>
+<select id="end" onchange="calcRoute();">
+  <option value="135 Fennell Avenue West, Hamilton, Ontario">Mohawk college</option>
+  <option value="64 Melrose Ave N, Hamilton, Ontario">64 Melrose Ave N, Hamilton, Ontario</option>
+  <option value="675 Upper James St, Hamilton ON L9C 2Z5">Walmart-Upper-james</option>
+  <option value="100 W 5th St, Hamilton ON L9C 0E3">Saint Joseph's Hospital</option>
+</select>
+<br />
+<br />
+<button id="geolocate" style="text-align: start;">Click for<br>current location</button>
+</div>
+
+
+
+  </div>
+
+  </div>
+  
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCYIKi2mjHS1MppooNYVa9df0sqiw6zn1Y&callback=initMap"></script></scrip>
+    <script src="Bike_Racks.js"></script>
+
+    <br />
+    <div class="address">
+    <strong style="font-size: 22px">Write your Address:</strong>
+    <input type="text" id="address" size="50" style="font-size: 22px" />
+    <button id="geocode" style="padding: 6px;">Geolocate</button>
+    <br />
+    <br />
+  </div>
+ <br />
+    
+    <span id="coords" style="display: none;"></span>
+    <script>
+       var markers = [];
+      function initMap() {
+        //Services used for geting directions
+        directionsService = new google.maps.DirectionsService();
+        directionsRenderer = new google.maps.DirectionsRenderer();
+        //Create map
+map = new google.maps.Map(document.getElementById("map"), {
+  center: { lat: 43.2387, lng: -79.8881 },
+  zoom: 15,
+});
+
+// have the directions renderer work with this map
+directionsRenderer.setMap(map);
+
+//geocoder service object
+geocoder = new google.maps.Geocoder();
+
+//Create for loop to find value from array
+for (i = 0; i < Bike_Racks.features.length;i++){
+  /*------------------------------------ New Icon ---------------------------------*/
+  if (Bike_Racks.features[i].properties.RACK_OWNER == "Private")
+  //customize marker for private bike rack owner
+    new_icon = "http://maps.google.com/mapfiles/kml/paddle/P.png";
+  
+  else if (Bike_Racks.features[i].properties.RACK_OWNER == "School" )
+  //customize marker for bike rack own by School
+    new_icon = "http://maps.google.com/mapfiles/kml/paddle/S.png";
+    
+
+    else if (Bike_Racks.features[i].properties.RACK_OWNER == "Municipal" )
+    //customize marker for bike rack own by muncipal
+    new_icon = "http://maps.google.com/mapfiles/kml/paddle/M.png";
+    
+    else if (Bike_Racks.features[i].properties.RACK_OWNER == "ROW" )
+    //customize marker for bike rack own by ROW
+    new_icon = "http://maps.google.com/mapfiles/kml/paddle/R.png";
+    
+
+    else if (Bike_Racks.features[i].properties.RACK_OWNER == "Park" )
+    //customize marker for bike rack own by park
+    new_icon = "http://maps.google.com/mapfiles/kml/paddle/P.png";
+    else 
+    //customize marker for other bike rack owner
+    new_icon = "http://maps.google.com/mapfiles/kml/paddle/O.png";
+
+    /*--------------------------------- Markers for Map --------------------*/
+      //Create new marker on map
+      new_marker = new google.maps.Marker({
+          position: {lng: Bike_Racks.features[i].geometry.coordinates[0],
+                     lat: Bike_Racks.features[i].geometry.coordinates[1] },
+                     //Set title for new marker
+                     title: Bike_Racks.features[i].properties.LOCATION_NAME,
+                     //Set customize icon
+                     icon: new_icon
+      });
+
+      //Put new marker on the map
+      new_marker.setMap(map);
+
+/*-------------------------------- Info window for markers --------------------- */
+      //Create info window
+infowindow = new google.maps.InfoWindow();
+//Set info window content
+marker_clicked = function(){
+  infowindow.setContent(this.NAME);
+  infowindow.open(map, this)
+}
+      //Content string for new marker window
+      new_marker.NAME = "<p>The name of the bike Location is</p>"+ "<strong>" + Bike_Racks.features[i].properties.LOCATION_NAME + "</strong>" + "<br /> <br />" +
+      "which is located At :-" + Bike_Racks.features[i].properties.ADDRESS + "<br / >"+ "<br />"+ "<p>The capacity of the rack is </p>"  + "<strong>" + Bike_Racks.features[i].properties.TOTAL_CAPACITY + "</strong>" ;
+      //set event to call marker on click
+     new_marker.addListener('click', marker_clicked);
+     
+     new_marker.CATEGORY = Bike_Racks.features[i].properties.RACK_OWNER;
+
+     //Store markers into array for filter
+     markers.push(new_marker);
+
+  }
+      }
+      /*-------------------- Funtions to filter markers ------------------------*/
+      //function for filtering private owner bike racks marker
+      function filterPrivate(){
+        for(i = 0; i <markers.length; i++){
+          if(markers[i].CATEGORY == "Private"){
+            markers[i].setMap(map);
+          }
+          else {
+            markers[i].setMap(null);
+          }
+        }
+      }
+
+      //function for filtering School owner bike racks marker
+      function filterSchool(){
+        for(i = 0; i <markers.length; i++){
+          if(markers[i].CATEGORY == "School"){
+            markers[i].setMap(map);
+          }
+          else {
+            markers[i].setMap(null);
+          }
+        }
+      }
+
+      //function for filtering municipal owner bike racks marker
+      function filterMunicipal(){
+        for(i = 0; i <markers.length; i++){
+          if(markers[i].CATEGORY == "Municipal"){
+            markers[i].setMap(map);
+          }
+          else {
+            markers[i].setMap(null);
+          }
+        }
+      }
+      
+      //function for filtering row owner bike racks marker
+      function filterROW(){
+        for(i = 0; i <markers.length; i++){
+          if(markers[i].CATEGORY == "ROW"){
+            markers[i].setMap(map);
+          }
+          else {
+            markers[i].setMap(null);
+          }
+        }
+      }
+      
+      //function for filtering park owner bike racks marker
+      function filterPark(){
+        for(i = 0; i <markers.length; i++){
+          if(markers[i].CATEGORY == "Park"){
+            markers[i].setMap(map);
+          }
+          else {
+            markers[i].setMap(null);
+          }
+        }
+      }
+
+      //function for filtering  bike racks own by none
+      function filterNull(){
+        for(i = 0; i <markers.length; i++){
+          if(markers[i].CATEGORY == null){
+            markers[i].setMap(map);
+          }
+          else {
+            markers[i].setMap(null);
+          }
+        }
+      }
+
+      function hideAll(){
+        for(i = 0; i <markers.length; i++){
+          if(markers[i].CATEGORY == "None"){
+            markers[i].setMap(map);
+          }
+          else {
+            markers[i].setMap(null);
+          }
+        }
+      }
+
+
+
+      /*------------------------------------------- Geolocate --------------------------*/
+      function showPositionOnMap(position)
+    {
+      // create a marker centered at the user's location
+      user_location = new google.maps.Marker({
+        position: { lat: position.coords.latitude, 
+                    lng: position.coords.longitude
+                  },
+        title: "Your Location",  // will appear when we hover over the marker
+        icon: "http://maps.google.com/mapfiles/kml/pal3/icon48.png"
+      });
+
+      // put the marker onto the map (it will not appear otherwise)
+      user_location.setMap(map);
+    }
+    
+    // call showPositionOnMap after finding the user's current location
+    document.getElementById("geolocate").onclick = function()
+    {
+      navigator.geolocation.getCurrentPosition(showPositionOnMap);
+    }
+
+    /*------------------------------------ GeoCoding -----------------------------*/
+
+    function codeAddress() {
+        var address = document.getElementById("address").value;
+
+        geocoder.geocode({ address: address }, function (results, status) {
+          if (status == "OK") {
+            // put the latitude and longitude on the page as text
+            document.getElementById("coords").innerHTML =
+              "coords: " +
+              results[0].geometry.location.lat() +
+              ", " +
+              results[0].geometry.location.lng();
+
+            // put a marker on the map at the given position
+            var marker = new google.maps.Marker({
+              map: map,
+              position: results[0].geometry.location,
+              title: "Your Address",
+              icon: "http://maps.google.com/mapfiles/kml/pal3/icon40.png"
+            });
+          } else {
+            alert(
+              "Geocode was not successful for the following reason: " + status
+            );
+          }
+        });
+      }
+
+      // call the codeAddress function when the geolocate button is clicked
+      document.getElementById("geocode").onclick = codeAddress;
+/*--------------------------- Directions -----------------------*/
+      function calcRoute() {
+  var start = document.getElementById('start').value;
+  var end = document.getElementById('end').value;
+  var request = {
+    origin: start,
+    destination: end,
+    travelMode: 'TRANSIT'
+  };
+  directionsService.route(request, function(result, status) {
+    if (status == 'OK') {
+      directionsRenderer.setDirections(result);
+    }
+  });
+}
+
+      document.getElementById("private").onclick = filterPrivate;
+      document.getElementById("School").onclick = filterSchool;
+      document.getElementById("Municipal").onclick = filterMunicipal;
+      document.getElementById("ROW").onclick = filterROW;
+      document.getElementById("Park").onclick = filterPark;
+      document.getElementById("Fnull").onclick = filterNull;
+      document.getElementById("geocode").onclick = codeAddress;
+      document.getElementById("hideallMarks").onclick = hideAll;
+      
+    
+     
+    </script>
+  </body>
+</html>
